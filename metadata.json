@@ -1,0 +1,6 @@
+{
+  "name": "Genius Coaching Centre Quiz App",
+  "description": "Comprehensive educational quiz platform for Classes 1 to 10 with interactive MCQ tests, real-time scoring, teacher syllabus and quiz management, and Firebase integration.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

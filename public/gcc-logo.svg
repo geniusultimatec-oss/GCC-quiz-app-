@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <clipPath id="circle-clip">
+      <circle cx="250" cy="250" r="248" />
+    </clipPath>
+  </defs>
+  <!-- Background circle -->
+  <circle cx="250" cy="250" r="250" fill="#ffffff" />
+  <!-- Official GCC Emblem Image -->
+  <image href="/gcc-logo.png" xlink:href="/gcc-logo.png" x="0" y="0" width="500" height="500" preserveAspectRatio="xMidYMid meet" clip-path="url(#circle-clip)" />
+</svg>

@@ -1,0 +1,86 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isTeacher() {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/teachers/$(request.auth.uid)) ||
+        request.auth.token.email == 'geniusultimatec@gmail.com'
+      );
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Teachers Collection
+    match /teachers/{teacherId} {
+      allow get: if isSignedIn() && (request.auth.uid == teacherId || isTeacher());
+      allow list: if isTeacher();
+      allow create: if isSignedIn() && request.auth.uid == teacherId;
+      allow update, delete: if isTeacher();
+    }
+
+    // Students Collection
+    match /students/{studentId} {
+      allow get: if true;
+      allow list: if isTeacher();
+      allow create: if request.resource.data.keys().hasAll(['studentId', 'name', 'classId'])
+        && request.resource.data.name is string && request.resource.data.name.size() <= 100;
+      allow update: if isTeacher();
+      allow delete: if isTeacher();
+    }
+
+    // Curriculum: Subjects & Chapters
+    match /subjects/{subjectId} {
+      allow read: if true;
+      allow write: if isTeacher();
+    }
+
+    match /chapters/{chapterId} {
+      allow read: if true;
+      allow write: if isTeacher();
+    }
+
+    // Question Bank: readable by students and teachers; write by teacher
+    match /questionBank/{questionId} {
+      allow read: if true;
+      allow write: if isTeacher();
+    }
+
+    // Quizzes: published quizzes are publicly readable; teachers can read and write all
+    match /quizzes/{quizId} {
+      allow read: if resource.data.status == 'published' || isTeacher();
+      allow write: if isTeacher();
+    }
+
+    // Quiz Attempts: Student can create submission; cannot tamper after create; teachers and leaderboards can view
+    match /quizAttempts/{attemptId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if request.resource.data.keys().hasAll(['quizId', 'studentId', 'score', 'totalMarks'])
+        && request.resource.data.score is number
+        && request.resource.data.totalMarks is number
+        && request.resource.data.studentName is string
+        && request.resource.data.studentName.size() <= 100;
+      allow update: if false; // Attempts are immutable once recorded
+      allow delete: if isTeacher();
+    }
+
+    // Settings
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isTeacher();
+    }
+  }
+}
